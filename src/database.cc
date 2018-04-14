@@ -195,11 +195,26 @@ void Database::LoadData(const std::string &data_folder_path,
 
 
 void Database::BuildMemberGraph() {
-  // Fill in your code here
+  for (auto *g : groups) {
+    for (auto *m : g->members) {
+      for (auto *m2: g->members) {
+        if (m == m2) {
+          continue;
+        }
+        if (m->connecting_members.find(m2->member_id) != m->connecting_members.end()) {
+          continue;
+        }
+        MemberConnection mc;
+        mc.group = g;
+        mc.dst = m2;
+        m->connecting_members[m2->member_id] = mc;
+      }
+    }
+  }
 }
 
 double Database::BestGroupsToJoin(Member *root) {
-  // Fill in your code here
+   Fill in your code here
 }
 
 }
