@@ -3,6 +3,7 @@
 #include <queue>
 
 #include "database.h"
+#include <limits>
 
 namespace algdb {
 
@@ -21,11 +22,11 @@ void Member::PathToMemberBFS(uint64_t dst_member_id) {
   this->parent = NULL;
   std::queue<Member*> q;
   q.push(this);
-  while (!q.empty) {
-    member *v = q.front;
+  while (!q.empty()) {
+    Member *v = q.front();
     q.pop();
     for (auto u : v->connecting_members) {
-      auto mc = v.second;
+      auto mc = u.second;
       auto md = mc.dst;
       if (md->member_id == dst_member_id) {
         md->parent = v;
@@ -33,22 +34,12 @@ void Member::PathToMemberBFS(uint64_t dst_member_id) {
         return;
       }
       if (md->color == COLOR_WHITE) {
-        md->cikir = COLOR_GRAY;
+        md->color = COLOR_GRAY;
         md->parent = v;
         q.push(md);
       }
     }
-    m->color = COLOR_BLACK;
-  }
-}
-
-void Member::PathToMemberIDDFS(uint64_t dst_member_id) {
-  for (int d = 0; d < INT_MAX; d++) {
-    Member *f = DLS(this, d, dst_member_id);
-    if (f != NULL) {
-      PrintPath(f);
-      return;
-    }
+    v->color = COLOR_BLACK;
   }
 }
 
@@ -59,7 +50,7 @@ Member *Member::DLS(Member *n, int d, uint64_t dst_member_id) {
   if (d > 0) {
     for (auto child : n->connecting_members) {
       auto mc = child.second;
-      auto found = DLS(mc.dst, d-1, dst_member_id);
+      auto f = DLS(mc.dst, d-1, dst_member_id);
       if (f != NULL) {
         mc.dst->parent = n;
         return f;
@@ -67,6 +58,16 @@ Member *Member::DLS(Member *n, int d, uint64_t dst_member_id) {
     }
   }
   return NULL;
+}
+
+void Member::PathToMemberIDDFS(uint64_t dst_member_id) {
+  for (int d = 0; d < std::numeric_limits<int>::max(); d++) {
+    Member *f = DLS(this, d, dst_member_id);
+    if (f != NULL) {
+      PrintPath(f);
+      return;
+    }
+  }
 }
   
 void Member::PrintPath(Member* dst) {
